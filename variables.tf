@@ -22,3 +22,13 @@ variable "instance_type" {
   type    = string
   default = "t2.micro"
 }
+
+variable "install_cw_agent" {
+  type    = bool
+  default = false
+}
+
+variable "install_ssm_agent" {
+  type    = bool
+  default = true
+}

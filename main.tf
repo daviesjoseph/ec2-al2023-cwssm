@@ -31,14 +31,30 @@ data "aws_ami" "al2023" {
   }
 }
 
+data "template_file" "install_ssm_agent" {
+  template = file("./shell/install_ssm_agent.sh")
+  vars = {
+    install = var.install_ssm_agent
+  }
+}
+
+data "template_file" "install_cw_agent" {
+  template = file("./shell/install_cw_agent.sh")
+  vars = {
+    install = var.install_cw_agent
+    region  = var.region
+  }
+}
+
 data "template_cloudinit_config" "user_data" {
+  base64_encode = true
   part {
     content_type = "text/x-shellscript"
-    content      = file("./shell/install_cw_agent.sh")
+    content      = data.template_file.install_cw_agent.rendered
   }
   part {
     content_type = "text/x-shellscript"
-    content      = file("./shell/install_cw_agent.sh")
+    content      = data.template_file.install_ssm_agent.rendered
   }
 }
 
@@ -56,6 +72,8 @@ resource "aws_instance" "TerraformSSMEnabledInstance" {
   tags = {
     Name  = var.instance_name
     Owner = var.owner
+    cw_agent = var.install_cw_agent
+    ssm_agent = var.install_ssm_agent
   }
 }
 
